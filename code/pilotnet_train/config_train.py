@@ -1,12 +1,32 @@
-# config_train.py
+# config_train_tf.py
 
-# CSV YAW + FILE_PATH
-CSV_PATH = "/home/tv/TiNy_PilotNet/dataset/Samples/datasets-T11-03-25/road_following/data.csv"
+# Danh sách dataset giữ nguyên format của bạn
+DATASETS = [
+    (
+        "/home/tv/TiNy_PilotNet/dataset/Samples/datasets-T10-30-25/road_following/data.csv",
+        "/home/tv/TiNy_PilotNet/dataset/Samples/datasets-T10-30-25/dataset_preprocessed"
+    ),
+    (
+        "/home/tv/TiNy_PilotNet/dataset/Samples/datasets-T11-03-25/road_following/data.csv",
+        "/home/tv/TiNy_PilotNet/dataset/Samples/datasets-T11-03-25/dataset_preprocessed"
+    ),
+    (
+        "/home/tv/TiNy_PilotNet/dataset/Samples/datasets-T11-03to06-25/road_following/data.csv",
+        "/home/tv/TiNy_PilotNet/dataset/Samples/datasets-T11-03to06-25/dataset_preprocessed"
+    ),
+    (
+        "/home/tv/TiNy_PilotNet/dataset/Samples/datasets-T11-07-25/road_following/data.csv",
+        "/home/tv/TiNy_PilotNet/dataset/Samples/datasets-T11-07-25/dataset_preprocessed"
+    ),
+    (
+        "/home/tv/TiNy_PilotNet/dataset/Samples/datasets-T11-09-25/road_following/data.csv",
+        "/home/tv/TiNy_PilotNet/dataset/Samples/datasets-T11-09-25/dataset_preprocessed"
+    ),
+]
 
-# Folder chứa .npy đã preprocess
-NPY_ROOT = "/home/tv/TiNy_PilotNet/dataset/Samples/datasets-T11-03-25/dataset_preprocessed"
-
-# Training settings
+# Training params
 BATCH_SIZE = 32
 EPOCHS = 20
-LR = 1e-3
+LR = 1e-4
+
+MODEL_OUT = "/home/tv/TiNy_PilotNet/model/pilotnet_small_keras.h5"

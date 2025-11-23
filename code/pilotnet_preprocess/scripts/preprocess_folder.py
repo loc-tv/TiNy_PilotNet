@@ -1,39 +1,50 @@
-# scripts/preprocess_folder.py
 import os
 import sys
 
-# Thêm thư mục cha để import config, preprocess...
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
 
 import pandas as pd
 import numpy as np
-from config import CSV_PATH, ROOT_DIR, OUT_DIR
+
+from config import DATASETS
 from preprocess import preprocess_path
 from utils import ensure_dir
 
-def main():
 
-    ensure_dir(OUT_DIR)
+def preprocess_one(csv_path, root_dir, out_dir):
+    ensure_dir(out_dir)
 
-    # CSV của bạn đã có header: file_path,yaw
-    df = pd.read_csv(CSV_PATH)
+    df = pd.read_csv(csv_path)
 
     for i, row in df.iterrows():
-        rel_path = row["file_path"]      # === Quan trọng ===
-
-        img_path = os.path.join(ROOT_DIR, rel_path)
+        rel = row["file_path"]
+        img_path = os.path.join(root_dir, rel)
 
         if not os.path.exists(img_path):
-            print("❌ File không tồn tại:", img_path)
+            print("❌ Missing:", img_path)
             continue
 
         img = preprocess_path(img_path, augment=False)
 
-        out_path = os.path.join(OUT_DIR, rel_path.replace(".jpg", ".npy"))
+        out_path = os.path.join(out_dir, rel.replace(".jpg", ".npy"))
         ensure_dir(os.path.dirname(out_path))
 
         np.save(out_path, img)
         print("Saved:", out_path)
+
+
+def main():
+    for d in DATASETS:
+        print("\n======================================")
+        print("📁 PROCESSING DATASET:", d["name"])
+        print("======================================")
+
+        preprocess_one(
+            csv_path=d["csv"],
+            root_dir=d["root"],
+            out_dir=d["out"]
+        )
+
 
 if __name__ == "__main__":
     main()

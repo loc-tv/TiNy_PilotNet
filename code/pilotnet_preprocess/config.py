@@ -2,6 +2,10 @@
 
 import os
 
+# =====================================================
+# Global preprocess settings
+# =====================================================
+
 # Input resolution cho K210 — QQVGA
 WIDTH = 160
 HEIGHT = 120
@@ -21,32 +25,66 @@ AUG_FLIP = True
 # Dataset paths
 # =====================================================
     
-# File CSV chứa: file_path,yaw
-# CSV_PATH = "/home/tv/TiNy_PilotNet/dataset/Samples/datasets-T11-03-25/road_following/data.csv"
+# =====================================================
+# Dataset paths
+# =====================================================
 
-# # Thư mục chứa ảnh gốc
-# ROOT_DIR = "/home/tv/TiNy_PilotNet/dataset/Samples/datasets-T11-03-25/road_following/images"
-
-# # Thư mục lưu ảnh sau khi preprocess (.npy)
-# OUT_DIR = "/home/tv/TiNy_PilotNet/dataset/Samples/datasets-T11-03-25/dataset_preprocessed"
-
-# thư mục chứa file config.py
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 
-# dataset nằm ở: /home/tv/TiNy_PilotNet/dataset/...
-DATASET_ROOT = os.path.abspath(os.path.join(BASE_DIR, "..", "..", "dataset"))
-
-CSV_PATH = os.path.join(
-    DATASET_ROOT,
-    "Samples/datasets-T11-03-25/road_following/data.csv"
+# thư mục dataset gốc: /home/tv/TiNy_PilotNet/dataset
+DATASET_ROOT = os.path.abspath(
+    os.path.join(BASE_DIR, "..", "..", "dataset")
 )
 
-ROOT_DIR = os.path.join(
-    DATASET_ROOT,
-    "Samples/datasets-T11-03-25/road_following"
-)
+# --- Khai báo nhiều dataset ở đây ---
+DATASETS = [
+    {
+        "name": "datasets-T10-30-25",
+        "csv": os.path.join(DATASET_ROOT, 
+                "Samples/datasets-T10-30-25/road_following/data.csv"),
+        "root": os.path.join(DATASET_ROOT, 
+                "Samples/datasets-T10-30-25/road_following"),
+        "out": os.path.join(DATASET_ROOT, 
+                "Samples/datasets-T10-30-25/dataset_preprocessed")
+    },
 
-OUT_DIR = os.path.join(
-    DATASET_ROOT,
-    "Samples/datasets-T11-03-25/dataset_preprocessed"
-)
+    {
+        "name": "datasets-T11-03-25",
+        "csv": os.path.join(DATASET_ROOT, 
+                "Samples/datasets-T11-03-25/road_following/data.csv"),
+        "root": os.path.join(DATASET_ROOT, 
+                "Samples/datasets-T11-03-25/road_following"),
+        "out": os.path.join(DATASET_ROOT, 
+                "Samples/datasets-T11-03-25/dataset_preprocessed")
+    },
+
+    {
+        "name": "datasets-T11-03to06-25",
+        "csv": os.path.join(DATASET_ROOT, 
+                "Samples/datasets-T11-03to06-25/road_following/data.csv"),
+        "root": os.path.join(DATASET_ROOT, 
+                "Samples/datasets-T11-03to06-25/road_following"),
+        "out": os.path.join(DATASET_ROOT, 
+                "Samples/datasets-T11-03to06-25/dataset_preprocessed")
+    },
+    
+    {
+        "name": "datasets-T11-07-25",
+        "csv": os.path.join(DATASET_ROOT, 
+                "Samples/datasets-T11-07-25/road_following/data.csv"),
+        "root": os.path.join(DATASET_ROOT, 
+                "Samples/datasets-T11-07-25/road_following"),
+        "out": os.path.join(DATASET_ROOT, 
+                "Samples/datasets-T11-07-25/dataset_preprocessed")
+    },
+    
+    {
+        "name": "datasets-T11-09-25",
+        "csv": os.path.join(DATASET_ROOT, 
+                "Samples/datasets-T11-09-25/road_following/data.csv"),
+        "root": os.path.join(DATASET_ROOT, 
+                "Samples/datasets-T11-09-25/road_following"),
+        "out": os.path.join(DATASET_ROOT, 
+                "Samples/datasets-T11-09-25/dataset_preprocessed")
+    },
+]

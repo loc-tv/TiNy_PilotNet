@@ -1,10 +1,12 @@
+# dataset_pilotnet.py
+
 import os
 import numpy as np
-import torch
-from torch.utils.data import Dataset
 import pandas as pd
+import tensorflow as tf
 
-class PilotNetNPYDataset(Dataset):
+
+class PilotNetNPYDatasetTF:
     def __init__(self, csv_path, root_npy):
         self.df = pd.read_csv(csv_path)
         self.root = root_npy
@@ -12,21 +14,29 @@ class PilotNetNPYDataset(Dataset):
     def __len__(self):
         return len(self.df)
 
-    def __getitem__(self, idx):
-        row = self.df.iloc[idx]
+    def generator(self):
+        for i in range(len(self.df)):
+            row = self.df.iloc[i]
 
-        npy_file = row["file_path"].replace(".jpg", ".npy")
-        full_path = os.path.join(self.root, npy_file)
+            npy_file = row["file_path"].replace(".jpg", ".npy")
+            full_path = os.path.join(self.root, npy_file)
 
-        img = np.load(full_path).astype(np.float32)
+            img = np.load(full_path).astype(np.float32)
 
-# đảm bảo đúng định dạng NCHW
-        if img.ndim == 2:
-            img = img[np.newaxis, :, :]
-        elif img.ndim == 3 and img.shape[-1] == 1:
-            img = np.transpose(img, (2, 0, 1))
+            # Numpy HWC cho Keras
+            if img.ndim == 2:
+                img = img[:, :, np.newaxis]
 
-        yaw = np.float32(row["yaw"])
-        return torch.tensor(img), torch.tensor(yaw)
-    
+            yaw = np.float32(row["yaw"])
+            yield img, yaw
 
+
+class PilotNetConcatDatasetTF:
+    @staticmethod
+    def load_from_config(dataset_list):
+        datasets = []
+        for csv_path, root in dataset_list:
+            ds = PilotNetNPYDatasetTF(csv_path, root)
+            datasets.append(ds)
+            print(f"[INFO] Loaded dataset: {csv_path}  ({len(ds)} samples)")
+        return datasets

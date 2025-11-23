@@ -1,54 +1,116 @@
-import torch
-from torch.utils.data import DataLoader
-from sklearn.model_selection import train_test_split
-import pandas as pd
+# train_pilotnet.py
 
-from dataset_pilotnet import PilotNetNPYDataset
-from model_pilotnet import PilotNet
-from config_train import CSV_PATH, NPY_ROOT, BATCH_SIZE, EPOCHS, LR
+import tensorflow as tf
+import numpy as np
+from model_pilotnet import PilotNetSmall
+from dataset_pilotnet import PilotNetConcatDatasetTF
+import config_train as cfg
+
+
+def dataset_to_tf(ds):
+    output_types = (tf.float32, tf.float32)
+    output_shapes = ((120, 160, 1), ())
+
+    tf_ds = tf.data.Dataset.from_generator(
+        ds.generator,
+        output_types=output_types,
+        output_shapes=output_shapes
+    )
+
+    return tf_ds
+
 
 def main():
-    df = pd.read_csv(CSV_PATH)
-    train_df, val_df = train_test_split(df, test_size=0.1, shuffle=True)
+    print("="*50)
+    print("🚀 PILOTNET KERAS TRAINING START")
+    print("="*50)
 
-    train_df.to_csv("train_split.csv", index=False)
-    val_df.to_csv("val_split.csv", index=False)
+    datasets = PilotNetConcatDatasetTF.load_from_config(cfg.DATASETS)
 
-    train_ds = PilotNetNPYDataset("train_split.csv", NPY_ROOT)
-    val_ds   = PilotNetNPYDataset("val_split.csv", NPY_ROOT)
+    # Gom dataset lại
+    full_tf_datasets = [dataset_to_tf(ds) for ds in datasets]
+    full_dataset = full_tf_datasets[0]
+    for ds in full_tf_datasets[1:]:
+        full_dataset = full_dataset.concatenate(ds)
 
-    train_loader = DataLoader(train_ds, batch_size=BATCH_SIZE, shuffle=True)
-    val_loader   = DataLoader(val_ds, batch_size=BATCH_SIZE)
+    full_dataset = full_dataset.shuffle(5000)
 
-    device = "cuda" if torch.cuda.is_available() else "cpu"
-    model = PilotNet().to(device)
+    total_len = sum([len(ds) for ds in datasets])
+    train_len = int(0.7 * total_len)
+    val_len = int(0.15 * total_len)
+    test_len = total_len - train_len - val_len
 
-    optim = torch.optim.Adam(model.parameters(), lr=LR)
-    loss_fn = torch.nn.MSELoss()
+    # Split giống PyTorch
+    # train_ds = full_dataset.take(train_len).batch(cfg.BATCH_SIZE)
+    # val_ds = full_dataset.skip(train_len).take(val_len).batch(cfg.BATCH_SIZE)
+    # test_ds = full_dataset.skip(train_len + val_len).batch(cfg.BATCH_SIZE)
+    train_ds = (
+        full_dataset
+        .take(train_len)
+        .shuffle(5000)
+        .batch(cfg.BATCH_SIZE)
+        .repeat()                      
+        .prefetch(tf.data.AUTOTUNE)
+    )
+    
+    val_ds = (
+        full_dataset
+        .skip(train_len)
+        .take(val_len)
+        .batch(cfg.BATCH_SIZE)
+        .prefetch(tf.data.AUTOTUNE)
+    )
 
-    for epoch in range(EPOCHS):
-        model.train()
-        train_loss = 0
-        for imgs, yaws in train_loader:
-            imgs, yaws = imgs.to(device), yaws.to(device).unsqueeze(1)
-            optim.zero_grad()
-            preds = model(imgs)
-            loss = loss_fn(preds, yaws)
-            loss.backward()
-            optim.step()
-            train_loss += loss.item()
+    test_ds = (
+        full_dataset
+        .skip(train_len + val_len)
+        .batch(cfg.BATCH_SIZE)
+        .prefetch(tf.data.AUTOTUNE)
+    )
 
-        model.eval()
-        val_loss = 0
-        with torch.no_grad():
-            for imgs, yaws in val_loader:
-                imgs, yaws = imgs.to(device), yaws.to(device).unsqueeze(1)
-                val_loss += loss_fn(model(imgs), yaws).item()
 
-        print(f"Epoch {epoch+1}/{EPOCHS} - Train {train_loss:.3f} | Val {val_loss:.3f}")
+    print(f"[DATASET SPLIT]")
+    print(f"Train: {train_len}")
+    print(f"Val:   {val_len}")
+    print(f"Test:  {test_len}\n")
 
-    torch.save(model.state_dict(), "/home/tv/TiNy_PilotNet/model/pilotnet.pth")
-    print("Saved: pilotnet.pth")
+    # Model
+    model = PilotNetSmall()
+    model.summary()
+
+    model.compile(
+        optimizer=tf.keras.optimizers.Adam(cfg.LR),
+        loss='mse',
+        metrics=['mae']
+    )
+    
+    steps_per_epoch = train_len // cfg.BATCH_SIZE
+    validation_steps = val_len // cfg.BATCH_SIZE
+
+
+    # model.fit(
+    #     train_ds,
+    #     validation_data=val_ds,
+    #     epochs=cfg.EPOCHS
+    # )
+    
+    model.fit(
+        train_ds,
+        validation_data=val_ds,
+        epochs=cfg.EPOCHS,
+        steps_per_epoch=steps_per_epoch,          
+        validation_steps=validation_steps         
+    )
+
+
+    # Evaluate
+    test_loss, test_mae = model.evaluate(test_ds)
+    print(f"\n🎯 Final Test Loss: {test_loss:.6f}")
+
+    # Save model
+    model.save(cfg.MODEL_OUT)
+    print(f"✅ Saved model to: {cfg.MODEL_OUT}")
+
 
 if __name__ == "__main__":
     main()

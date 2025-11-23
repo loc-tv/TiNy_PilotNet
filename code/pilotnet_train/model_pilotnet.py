@@ -1,43 +1,24 @@
-import torch
-import torch.nn as nn
-import torch.nn.functional as F
+# model_pilotnet_tf.py
 
-class PilotNet(nn.Module):
-    def __init__(self):
-        super().__init__()
-
-        self.conv = nn.Sequential(
-            nn.Conv2d(1, 24, kernel_size=5, stride=2),
-            nn.ReLU(),
-
-            nn.Conv2d(24, 36, kernel_size=5, stride=2),
-            nn.ReLU(),
-
-            nn.Conv2d(36, 48, kernel_size=5, stride=2),
-            nn.ReLU(),
-
-            nn.Conv2d(48, 64, kernel_size=3, stride=1),
-            nn.ReLU(),
-
-            nn.Conv2d(64, 64, kernel_size=3, stride=1),
-            nn.ReLU(),
-        )
-
-        # --- Quan trọng: 64×8×13 = 6656 ---
-        self.fc = nn.Sequential(
-            nn.Linear(6656, 100),
-            nn.ReLU(),
-            nn.Linear(100, 50),
-            nn.ReLU(),
-            nn.Linear(50, 10),
-            nn.ReLU(),
-            nn.Linear(10, 1)
-        )
-
-    def forward(self, x):
-        x = self.conv(x)
-        x = x.view(x.size(0), -1)  # flatten
-        return self.fc(x)
+import tensorflow as tf
+from tensorflow.keras.layers import *
+from tensorflow.keras.models import Model
 
 
-    
+def PilotNetSmall(input_shape=(120, 160, 1)):
+    inputs = Input(shape=input_shape)
+
+    x = Conv2D(24, 5, strides=2, activation='relu')(inputs)
+    x = Conv2D(36, 5, strides=2, activation='relu')(x)
+    x = Conv2D(48, 5, strides=2, activation='relu')(x)
+    x = Conv2D(64, 3, strides=1, activation='relu')(x)
+    x = Conv2D(64, 3, strides=1, activation='relu')(x)
+
+    x = Flatten()(x)
+
+    x = Dense(100, activation='relu')(x)
+    x = Dense(50, activation='relu')(x)
+    x = Dense(10, activation='relu')(x)
+    outputs = Dense(1)(x)
+
+    return Model(inputs, outputs)

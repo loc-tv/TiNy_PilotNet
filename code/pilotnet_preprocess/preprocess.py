@@ -23,8 +23,10 @@ def preprocess_image(img, augment=True, yaw=None):
 
     img = normalize(img)
 
-    # convert (H,W,C) → (C,H,W)
-    img = np.transpose(img, (2, 0, 1))
+    # # convert (H,W,C) → (C,H,W)
+    # img = np.transpose(img, (2, 0, 1))
+    img = img.astype(np.float32)
+
 
     if yaw is None:
         return img.astype(np.float32)

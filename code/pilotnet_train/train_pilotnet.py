@@ -15,7 +15,7 @@ def dataset_to_tf(ds):
         ds.generator,
         output_types=output_types,
         output_shapes=output_shapes
-    )
+    ).map(lambda x, y: (x, y), num_parallel_calls=tf.data.AUTOTUNE)
 
     return tf_ds
 
@@ -33,7 +33,7 @@ def main():
     for ds in full_tf_datasets[1:]:
         full_dataset = full_dataset.concatenate(ds)
 
-    full_dataset = full_dataset.shuffle(5000)
+    # full_dataset = full_dataset.shuffle(5000)
 
     total_len = sum([len(ds) for ds in datasets])
     train_len = int(0.7 * total_len)
@@ -108,8 +108,8 @@ def main():
     print(f"\n🎯 Final Test Loss: {test_loss:.6f}")
 
     # Save model
-    model.save(cfg.MODEL_OUT)
-    print(f"✅ Saved model to: {cfg.MODEL_OUT}")
+    model.save(cfg.MODEL_OUT.replace(".h5", ".keras"))
+    print(f"✅ Saved model to: {cfg.MODEL_OUT.replace('.h5', '.keras')}")
 
 
 if __name__ == "__main__":

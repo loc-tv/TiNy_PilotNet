@@ -2,7 +2,7 @@
 import random
 import cv2
 import numpy as np
-from config import AUG_BRIGHTNESS, AUG_BLUR, AUG_FLIP
+from config_data import AUG_BRIGHTNESS, AUG_BLUR, AUG_FLIP
 
 def random_brightness_contrast(img, prob=0.6):
     if not AUG_BRIGHTNESS or random.random() > prob:

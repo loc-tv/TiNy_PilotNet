@@ -1,6 +1,6 @@
 # preprocess.py
 import numpy as np
-from config import CROP_TOP_FRAC, TO_GRAYSCALE
+from config_data import CROP_TOP_FRAC, TO_GRAYSCALE
 from image_ops import load_rgb, crop_top, resize_qqvga, to_gray, normalize
 from augment import random_brightness_contrast, random_blur, random_flip
 

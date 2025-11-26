@@ -1,7 +1,7 @@
 # image_ops.py
 import cv2
 import numpy as np
-from config import WIDTH, HEIGHT, NORMALIZE_RANGE
+from config_data import WIDTH, HEIGHT, NORMALIZE_RANGE
 
 def load_rgb(path):
     img = cv2.imread(path, cv2.IMREAD_COLOR)

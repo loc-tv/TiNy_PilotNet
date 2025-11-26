@@ -6,7 +6,7 @@ sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
 import pandas as pd
 import numpy as np
 
-from config import DATASETS
+from config_data import DATASETS
 from preprocess import preprocess_path
 from utils import ensure_dir
 

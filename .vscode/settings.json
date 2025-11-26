@@ -1,0 +1,6 @@
+{
+  "python.analysis.reportMissingImports": "none",
+  "python.analysis.reportMissingModuleSource": "none",
+  "python.analysis.typeCheckingMode": "basic"
+
+}
